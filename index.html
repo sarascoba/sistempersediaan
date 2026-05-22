@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microsite Persediaan Barang</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card-custom { border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+
+<div class="container py-4" style="max-width: 600px;">
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h3 class="fw-bold text-primary">📦 LogistikKu</h3>
+        <p class="text-muted small">Sistem Update Stok Cepat & Ringan</p>
+    </div>
+
+    <!-- Form Transaksi Cepat -->
+    <div class="card card-custom border-0 mb-4">
+        <div class="card-body">
+            <h5 class="card-title fw-bold mb-3">Update Stok Barang</h5>
+            <form id="formTransaksi">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">ID Barang</label>
+                    <input type="text" id="txId" class="form-control" placeholder="Contoh: BRG001" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Jumlah</label>
+                    <input type="number" id="txJumlah" class="form-control" min="1" value="1" required>
+                </div>
+                <div class="row g-2">
+                    <div class="col">
+                        <button type="button" onclick="kirimTransaksi('masuk')" class="btn btn-success w-100 fw-bold">📥 Barang Masuk</button>
+                    </div>
+                    <div class="col">
+                        <button type="button" onclick="kirimTransaksi('keluar')" class="btn btn-danger w-100 fw-bold">📤 Barang Keluar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Monitor Stok -->
+    <div class="card card-custom border-0">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title fw-bold m-0">Data Stok Saat Ini</h5>
+                <button onclick="muatDataStok()" class="btn btn-sm btn-outline-secondary">🔄 Refresh</button>
+            </div>
+            
+            <!-- Input Cari -->
+            <input type="text" id="cariBarang" class="form-control form-control-sm mb-3" placeholder="Cari nama atau kategori...">
+
+            <!-- Tempat List Data -->
+            <div id="loading" class="text-center my-3">Memuat data...</div>
+            <div class="list-group" id="listStok"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap & JS script -->
+<script>
+    // GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+    const API_URL = "URL_WEB_APP_ANDA_DISINI"; 
+
+    // Muat data saat halaman pertama kali dibuka
+    document.addEventListener("DOMContentLoaded", muatDataStok);
+
+    // Fungsi mengambil data dari Google Sheets
+    async function muatDataStok() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('listStok').innerHTML = '';
+        
+        try {
+            let response = await fetch(API_URL);
+            let data = await response.json();
+            
+            document.getElementById('loading').style.display = 'none';
+            renderList(data);
+
+            // Fitur Pencarian Real-time
+            document.getElementById('cariBarang').addEventListener('input', function(e) {
+                let keyword = e.target.value.toLowerCase();
+                let filtered = data.filter(item => 
+                    item.nama.toLowerCase().includes(keyword) || 
+                    item.kategori.toLowerCase().includes(keyword) ||
+                    item.id.toLowerCase().includes(keyword)
+                );
+                renderList(filtered);
+            });
+
+        } catch (error) {
+            document.getElementById('loading').innerText = 'Gagal memuat data.';
+            console.error(error);
+        }
+    }
+
+    // Fungsi menampilkan data ke halaman
+    function renderList(data) {
+        const container = document.getElementById('listStok');
+        container.innerHTML = '';
+        
+        if(data.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted small py-3">Barang tidak ditemukan</div>';
+            return;
+        }
+
+        data.forEach(item => {
+            let badgeColor = item.stok <= 5 ? 'bg-danger' : 'bg-primary';
+            container.innerHTML += `
+                <div class="list-group-item d-flex justify-content-between align-items-center border-start-0 border-end-0 px-0 py-3">
+                    <div>
+                        <h6 class="mb-0 fw-bold">${item.nama}</h6>
+                        <small class="text-muted">${item.id} • Rak: ${item.lokasi}</small>
+                    </div>
+                    <span class="badge ${badgeColor} rounded-pill fs-6">${item.stok}</span>
+                </div>
+            `;
+        });
+    }
+
+    // Fungsi mengirim data transaksi (Masuk/Keluar)
+    async function kirimTransaksi(jenis) {
+        const id = document.getElementById('txId').value;
+        const jumlah = document.getElementById('txJumlah').value;
+
+        if (!id || !jumlah) {
+            alert('Mohon isi ID Barang dan Jumlah!');
+            return;
+        }
+
+        if(confirm(`Konfirmasi barang ${jenis} sebanyak ${jumlah} pcs?`)) {
+            try {
+                let response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ id: id, jumlah: jumlah, jenis: jenis })
+                });
+                let hasil = await response.json();
+                alert(hasil.status);
+                
+                // Reset form & refresh data
+                document.getElementById('formTransaksi').reset();
+                muatDataStok();
+            } catch (error) {
+                alert('Gagal memproses data.');
+                console.error(error);
+            }
+        }
+    }
+</script>
+</body>
+</html>
