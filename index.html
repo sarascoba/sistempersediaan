@@ -3,138 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Microsite Persediaan Barang</title>
+    <title>Update Stok Barang - SIMBA MAKASAR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; }
         .card-custom { border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .nav-tabs .nav-link { color: #6c757d; font-weight: bold; }
-        .nav-tabs .nav-link.active { color: #0d6efd; }
+        .hasil-pencarian { 
+            max-height: 200px; 
+            overflow-y: auto; 
+            position: absolute; 
+            z-index: 1000; 
+            width: 100%; 
+        }
     </style>
 </head>
 <body>
 
 <div class="container py-4" style="max-width: 600px;">
     <div class="text-center mb-4">
-        <h3 class="fw-bold text-primary">SIMBA Makasar</h3>
-        <p class="text-muted small">Sistem Informasi Manajemen Barang Makasar</p>
+        <h3 class="fw-bold text-primary">SIMBA MAKASAR</h3>
+        <p class="text-muted small">Pencarian & Update Stok Cepat</p>
     </div>
 
-    <!-- Pilihan Menu Tab -->
-    <ul class="nav nav-tabs mb-3 border-0 justify-content-center" id="menuTab" role="tablist">
-        <li class="nav-item">
-            <button class="nav-link active border-0 bg-transparent" id="update-tab" data-bs-toggle="tab" data-bs-target="#panelUpdate" type="button">Update Stok</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link border-0 bg-transparent" id="baru-tab" data-bs-toggle="tab" data-bs-target="#panelBaru" type="button">+ Barang Baru</button>
-        </li>
-    </ul>
-
-    <div class="tab-content">
-        <!-- PANEL UPDATE STOK -->
-        <div class="tab-pane fade show active" id="panelUpdate">
-            <div class="card card-custom border-0 mb-4">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold mb-3">Transaksi Stok</h5>
-                    <form id="formTransaksi">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">ID Barang</label>
-                            <input type="text" id="txId" class="form-control" placeholder="Contoh: BRG001" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Jumlah</label>
-                            <input type="number" id="txJumlah" class="form-control" min="1" value="1" required>
-                        </div>
-                        <div class="row g-2">
-                            <div class="col">
-                                <button type="button" onclick="kirimTransaksi('masuk')" class="btn btn-success w-100 fw-bold">📥 Barang Masuk</button>
-                            </div>
-                            <div class="col">
-                                <button type="button" onclick="kirimTransaksi('keluar')" class="btn btn-danger w-100 fw-bold">📤 Barang Keluar</button>
-                            </div>
-                        </div>
-                    </form>
+    <div class="card card-custom border-0 mb-4">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-bold mb-4 text-secondary">📥 / 📤 Update Stok Barang</h5>
+            <form id="formTransaksi">
+                
+                <div class="mb-3 position-relative">
+                    <label class="form-label small fw-bold text-dark">Cari & Pilih Nama Barang</label>
+                    <input type="text" id="cariNamaInput" class="form-control" placeholder="Ketik nama atau ID barang..." autocomplete="off">
+                    
+                    <input type="hidden" id="txId"> 
+                    
+                    <div id="dropdownHasil" class="list-group hasil-pencarian shadow-sm d-none"></div>
                 </div>
-            </div>
-        </div>
 
-        <!-- PANEL TAMBAH BARANG BARU -->
-        <div class="tab-pane fade" id="panelBaru">
-            <div class="card card-custom border-0 mb-4">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold mb-3">Tambah Item Baru ke Database</h5>
-                    <form id="formBarangBaru">
-                        <div class="mb-2">
-                            <label class="form-label small fw-bold">ID Barang</label>
-                            <input type="text" id="newId" class="form-control form-control-sm" placeholder="BRG004" required>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small fw-bold">Nama Barang</label>
-                            <input type="text" id="newNama" class="form-control form-control-sm" placeholder="Nama item lengkap" required>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small fw-bold">Kategori</label>
-                            <input type="text" id="newKategori" class="form-control form-control-sm" placeholder="Contoh: ATK, Medis, dll" required>
-                        </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col">
-                                <label class="form-label small fw-bold">Stok Awal</label>
-                                <input type="number" id="newStok" class="form-control form-control-sm" min="0" value="0" required>
-                            </div>
-                            <div class="col">
-                                <label class="form-label small fw-bold">Lokasi Rak</label>
-                                <input type="text" id="newLokasi" class="form-control form-control-sm" placeholder="Rak C-3" required>
-                            </div>
-                        </div>
-                        <button type="button" onclick="tambahBarangBaru()" class="btn btn-primary w-100 fw-bold">💾 Simpan Barang Baru</button>
-                    </form>
+                <div id="infoBarangTerpilih" class="alert alert-info d-none py-2 px-3 small mb-3">
+                    <strong>Terpilih:</strong> <span id="lblNamaBarang">-</span> (<span id="lblIdBarang">-</span>) <br>
+                    <span class="text-muted">Stok Sekarang: <b id="lblStokSekarang">-</b> | Lokasi: <span id="lblLokasiBarang">-</span></span>
                 </div>
-            </div>
+                
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-dark">Jumlah Perubahan</label>
+                    <input type="number" id="txJumlah" class="form-control" min="1" value="1" required>
+                </div>
+                
+                <div class="row g-2">
+                    <div class="col-6">
+                        <button type="button" onclick="kirimTransaksi('masuk')" class="btn btn-success w-100 fw-bold py-2">📥 Barang Masuk</button>
+                    </div>
+                    <div class="col-6">
+                        <button type="button" onclick="kirimTransaksi('keluar')" class="btn btn-danger w-100 fw-bold py-2">📤 Barang Keluar</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Monitor Stok -->
     <div class="card card-custom border-0">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="card-title fw-bold m-0">Data Stok Saat Ini</h5>
+                <h6 class="card-title fw-bold m-0 text-secondary">Semua Data Stok</h6>
                 <button onclick="muatDataStok()" class="btn btn-sm btn-outline-secondary">🔄 Refresh</button>
             </div>
-            <input type="text" id="cariBarang" class="form-control form-control-sm mb-3" placeholder="Cari ID, nama, kategori atau lokasi...">
-            <div id="loading" class="text-center my-3">Memuat data...</div>
-            <div class="list-group" id="listStok"></div>
+            
+            <div id="loading" class="text-center my-3 text-muted small">Memuat database...</div>
+            <div class="list-group list-group-flush" id="listStok"></div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+    // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
     const API_URL = "https://script.google.com/macros/s/AKfycbwDucogQ2PHEaODrG8hIhddfl9MzhiKlaruLYLE5ajU/dev"; 
+
+    let masterDataBarang = []; // Tempat menyimpan data dari Google Sheets global
 
     document.addEventListener("DOMContentLoaded", muatDataStok);
 
+    // 1. Fungsi Mengambil Data dari Google Sheets
     async function muatDataStok() {
         document.getElementById('loading').style.display = 'block';
         document.getElementById('listStok').innerHTML = '';
         
         try {
             let response = await fetch(API_URL);
-            let data = await response.json();
+            masterDataBarang = await response.json();
             
             document.getElementById('loading').style.display = 'none';
-            renderList(data);
-
-            document.getElementById('cariBarang').addEventListener('input', function(e) {
-                let keyword = e.target.value.toLowerCase();
-                let filtered = data.filter(item => 
-                    item.nama.toLowerCase().includes(keyword) || 
-                    item.kategori.toLowerCase().includes(keyword) ||
-                    item.id.toLowerCase().includes(keyword) ||
-                    item.lokasi.toLowerCase().includes(keyword)
-                );
-                renderList(filtered);
-            });
+            renderListUtama(masterDataBarang);
+            inisialisasiPencarianForm();
 
         } catch (error) {
             document.getElementById('loading').innerText = 'Gagal memuat data.';
@@ -142,22 +101,18 @@
         }
     }
 
-    function renderList(data) {
+    // 2. Tampilkan Daftar Stok Utama di Bagian Bawah
+    function renderListUtama(data) {
         const container = document.getElementById('listStok');
         container.innerHTML = '';
         
-        if(data.length === 0) {
-            container.innerHTML = '<div class="text-center text-muted small py-3">Barang tidak ditemukan</div>';
-            return;
-        }
-
         data.forEach(item => {
             let badgeColor = item.stok <= 5 ? 'bg-danger' : 'bg-primary';
             container.innerHTML += `
-                <div class="list-group-item d-flex justify-content-between align-items-center border-start-0 border-end-0 px-0 py-3">
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
                     <div>
-                        <h6 class="mb-0 fw-bold">${item.nama}</h6>
-                        <small class="text-muted">${item.id} • Kat: ${item.kategori} • Lokasi: ${item.lokasi}</small>
+                        <strong class="text-dark d-block mb-0">${item.nama}</strong>
+                        <span class="text-muted small">${item.id} • ${item.kategori} • Lokasi: ${item.lokasi}</span>
                     </div>
                     <span class="badge ${badgeColor} rounded-pill fs-6">${item.stok}</span>
                 </div>
@@ -165,58 +120,107 @@
         });
     }
 
+    // 3. Logika Pencarian Nama Barang di Kolom Input Form
+    function inisialisasiPencarianForm() {
+        const inputCari = document.getElementById('cariNamaInput');
+        const dropdown = document.getElementById('dropdownHasil');
+
+        inputCari.addEventListener('input', function() {
+            let keyword = this.value.toLowerCase();
+            dropdown.innerHTML = '';
+
+            if (keyword.length === 0) {
+                dropdown.classList.add('d-none');
+                return;
+            }
+
+            // Filter barang berdasarkan nama atau ID
+            let hasilFilter = masterDataBarang.filter(item => 
+                item.nama.toLowerCase().includes(keyword) || 
+                item.id.toLowerCase().includes(keyword)
+            );
+
+            if (hasilFilter.length > 0) {
+                dropdown.classList.remove('d-none');
+                hasilFilter.forEach(item => {
+                    let tombolItem = document.createElement('button');
+                    tombolItem.type = 'button';
+                    tombolItem.className = 'list-group-item list-group-item-action text-start small';
+                    tombolItem.innerHTML = `<b>${item.nama}</b> <span class="text-muted">(${item.id}) - Stok: ${item.stok}</span>`;
+                    
+                    // Jika item dropdown diklik
+                    tombolItem.addEventListener('click', function() {
+                        pilihBarang(item);
+                    });
+                    
+                    dropdown.appendChild(tombolItem);
+                });
+            } else {
+                dropdown.innerHTML = '<div class="list-group-item text-muted small">Barang tidak ditemukan</div>';
+                dropdown.classList.remove('d-none');
+            }
+        });
+
+        // Sembunyikan dropdown jika klik di luar area input
+        document.addEventListener('click', function(e) {
+            if (e.target !== inputCari) {
+                dropdown.classList.add('d-none');
+            }
+        });
+    }
+
+    // 4. Aksi Ketika Nama Barang Dipilih dari Dropdown Pencarian
+    function pilihBarang(item) {
+        document.getElementById('cariNamaInput').value = item.nama;
+        document.getElementById('txId').value = item.id;
+        
+        // Tampilkan kotak info barang terpilih
+        document.getElementById('lblNamaBarang').innerText = item.nama;
+        document.getElementById('lblIdBarang').innerText = item.id;
+        document.getElementById('lblStokSekarang').innerText = item.stok;
+        document.getElementById('lblLokasiBarang').innerText = item.lokasi;
+        document.getElementById('infoBarangTerpilih').classList.remove('d-none');
+        
+        document.getElementById('dropdownHasil').classList.add('d-none');
+    }
+
+    // 5. Fungsi Mengirim Transaksi Update Stok ke Google Sheets
     async function kirimTransaksi(jenis) {
         const id = document.getElementById('txId').value;
         const jumlah = document.getElementById('txJumlah').value;
+        const namaBarang = document.getElementById('lblNamaBarang').innerText;
 
-        if (!id || !jumlah) {
-            alert('Mohon isi ID Barang dan Jumlah!');
+        if (!id) {
+            alert('Silakan cari dan pilih barang terlebih dahulu melalui kolom pencarian!');
             return;
         }
 
-        try {
-            let response = await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ id: id, jumlah: jumlah, jenis: jenis })
-            });
-            let hasil = await response.json();
-            alert(hasil.status);
-            
-            document.getElementById('formTransaksi').reset();
-            muatDataStok();
-        } catch (error) {
-            alert('Gagal memproses data.');
-        }
-    }
-
-    async function tambahBarangBaru() {
-        const id = document.getElementById('newId').value;
-        const nama = document.getElementById('newNama').value;
-        const kategori = document.getElementById('newKategori').value;
-        const stok = document.getElementById('newStok').value;
-        const lokasi = document.getElementById('newLokasi').value;
-
-        if (!id || !nama || !kategori || !lokasi) {
-            alert('Mohon lengkapi semua kolom barang baru!');
+        if (!jumlah || jumlah < 1) {
+            alert('Masukkan jumlah perubahan stok yang valid!');
             return;
         }
 
-        try {
-            let response = await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ id: id, nama: nama, kategori: kategori, stok: stok, lokasi: lokasi, jenis: 'baru' })
-            });
-            let hasil = await response.json();
-            alert(hasil.status);
-            
-            if(!hasil.status.includes("Error")) {
-                document.getElementById('formBarangBaru').reset();
+        if (confirm(`Apakah Anda yakin ingin mencatat barang [ ${jenis.toUpperCase()} ] untuk "${namaBarang}" sebanyak ${jumlah} pcs?`)) {
+            try {
+                let response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ id: id, jumlah: jumlah, jenis: jenis })
+                });
+                let hasil = await response.json();
+                
+                alert(hasil.status);
+                
+                // Reset Form & Sembunyikan Info
+                document.getElementById('formTransaksi').reset();
+                document.getElementById('infoBarangTerpilih').classList.add('d-none');
+                document.getElementById('txId').value = "";
+                
+                // Muat ulang data terbaru dari Google Sheets
                 muatDataStok();
-                // Pindah kembali ke tab update stok setelah berhasil
-                document.getElementById('update-tab').click();
+            } catch (error) {
+                alert('Gagal memperbarui stok ke server.');
+                console.error(error);
             }
-        } catch (error) {
-            alert('Gagal menyimpan barang baru.');
         }
     }
 </script>
