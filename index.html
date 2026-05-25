@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Informasi Manajemen Barang Makasar</title>
+    <title>Sistem Logistik - LogistikKu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; }
@@ -15,30 +15,30 @@
             z-index: 1050; 
             width: 100%; 
         }
-        .nav-tabs .nav-link { color: #6c757d; font-weight: bold; border: none; background: transparent; }
-        .nav-tabs .nav-link.active { color: #0d6efd; border-bottom: 3px solid #0d6efd; }
+        .nav-pills .nav-link { color: #6c757d; font-weight: bold; background-color: transparent; }
+        .nav-pills .nav-link.active { color: #fff; background-color: #0d6efd; }
     </style>
 </head>
 <body>
 
 <div class="container py-4" style="max-width: 600px;">
     <div class="text-center mb-4">
-        <h3 class="fw-bold text-primary">SIMBA Makasar</h3>
-        <p class="text-muted small">Sistem Informasi Manajemen Barang Makasar</p>
+        <h3 class="fw-bold text-primary">📦 LogistikKu</h3>
+        <p class="text-muted small">Sistem Persediaan Barang Real-Time</p>
     </div>
 
-    <ul class="nav nav-tabs mb-4 justify-content-center" id="logistikTab" role="tablist">
-        <li class="nav-item">
-            <button class="nav-link active fs-6" id="update-tab" data-bs-toggle="tab" data-bs-target="#panelUpdate" type="button">🔄 Update Stok</button>
+    <ul class="nav nav-pills mb-4 justify-content-center bg-white p-1 rounded shadow-sm" id="logistikTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active w-100" id="update-tab" data-bs-toggle="pill" data-bs-target="#panelUpdate" type="button" role="tab" aria-controls="panelUpdate" aria-selected="true">🔄 Update Stok</button>
         </li>
-        <li class="nav-item">
-            <button class="nav-link fs-6" id="baru-tab" data-bs-toggle="tab" data-bs-target="#panelBaru" type="button">➕ Barang Baru</button>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link w-100" id="baru-tab" data-bs-toggle="pill" data-bs-target="#panelBaru" type="button" role="tab" aria-controls="panelBaru" aria-selected="false">➕ Barang Baru</button>
         </li>
     </ul>
 
-    <div class="tab-content">
+    <div class="tab-content" id="logistikTabContent">
         
-        <div class="tab-pane fade show active" id="panelUpdate">
+        <div class="tab-pane fade show active" id="panelUpdate" role="tabpanel" aria-labelledby="update-tab">
             <div class="card card-custom border-0 mb-4">
                 <div class="card-body p-4">
                     <h5 class="card-title fw-bold mb-3 text-secondary">📥 / 📤 Transaksi Stok</h5>
@@ -69,7 +69,7 @@
                         <div class="row g-2 mb-4">
                             <div class="col-6">
                                 <label class="form-label small fw-bold text-info">Stok Saat Ini</label>
-                                <input type="text" id="txStokSekarang" class="form-control bg-info-subtle fw-bold text-center text-dark" value="- " readonly>
+                                <input type="text" id="txStokSekarang" class="form-control bg-info-subtle fw-bold text-center text-dark" value="-" readonly>
                             </div>
                             <div class="col-6">
                                 <label class="form-label small fw-bold text-dark">Jumlah Perubahan</label>
@@ -90,7 +90,7 @@
             </div>
         </div>
 
-        <div class="tab-pane fade" id="panelBaru">
+        <div class="tab-pane fade" id="panelBaru" role="tabpanel" aria-labelledby="baru-tab">
             <div class="card card-custom border-0 mb-4">
                 <div class="card-body p-4">
                     <h5 class="card-title fw-bold mb-3 text-secondary">📝 Registrasi Item Baru</h5>
@@ -291,7 +291,10 @@
             if(!hasil.status.includes("Error")) {
                 document.getElementById('formBarangBaru').reset();
                 muatDataStok();
-                document.getElementById('update-tab').click(); // Pindah otomatis ke tab utama
+                
+                // Berpindah tab secara aman menggunakan Bootstrap JS Instance
+                let firstTab = new bootstrap.Tab(document.getElementById('update-tab'));
+                firstTab.show();
             }
         } catch (error) { alert('Gagal menyimpan.'); btn.disabled = false; }
     }
