@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Stok Barang - SIMBA MAKASAR</title>
+    <title>Update Stok Barang - LogistikKu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; }
         .card-custom { border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .hasil-pencarian { 
+        .dropdown-pencarian { 
             max-height: 200px; 
             overflow-y: auto; 
             position: absolute; 
-            z-index: 1000; 
+            z-index: 1050; 
             width: 100%; 
         }
     </style>
@@ -21,32 +21,47 @@
 
 <div class="container py-4" style="max-width: 600px;">
     <div class="text-center mb-4">
-        <h3 class="fw-bold text-primary">SIMBA MAKASAR</h3>
-        <p class="text-muted small">Pencarian & Update Stok Cepat</p>
+        <h3 class="fw-bold text-primary">📦 LogistikKu</h3>
+        <p class="text-muted small">Sistem Update Stok Terintegrasi</p>
     </div>
 
     <div class="card card-custom border-0 mb-4">
         <div class="card-body p-4">
-            <h5 class="card-title fw-bold mb-4 text-secondary">📥 / 📤 Update Stok Barang</h5>
+            <h5 class="card-title fw-bold mb-4 text-secondary">📥 / 📤 Transaksi Stok</h5>
             <form id="formTransaksi">
                 
                 <div class="mb-3 position-relative">
-                    <label class="form-label small fw-bold text-dark">Cari & Pilih Nama Barang</label>
-                    <input type="text" id="cariNamaInput" class="form-control" placeholder="Ketik nama atau ID barang..." autocomplete="off">
+                    <label class="form-label small fw-bold text-dark">Nama Barang (Ketik untuk Mencari)</label>
+                    <input type="text" id="txNamaBarang" class="form-control" placeholder="Cari nama barang di sini..." autocomplete="off" required>
                     
-                    <input type="hidden" id="txId"> 
-                    
-                    <div id="dropdownHasil" class="list-group hasil-pencarian shadow-sm d-none"></div>
+                    <div id="dropdownHasil" class="list-group dropdown-pencarian shadow-sm d-none"></div>
                 </div>
 
-                <div id="infoBarangTerpilih" class="alert alert-info d-none py-2 px-3 small mb-3">
-                    <strong>Terpilih:</strong> <span id="lblNamaBarang">-</span> (<span id="lblIdBarang">-</span>) <br>
-                    <span class="text-muted">Stok Sekarang: <b id="lblStokSekarang">-</b> | Lokasi: <span id="lblLokasiBarang">-</span></span>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-secondary">ID Barang</label>
+                    <input type="text" id="txId" class="form-control bg-light" placeholder="Otomatis terisi..." readonly>
                 </div>
-                
-                <div class="mb-4">
-                    <label class="form-label small fw-bold text-dark">Jumlah Perubahan</label>
-                    <input type="number" id="txJumlah" class="form-control" min="1" value="1" required>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-secondary">Kategori</label>
+                        <input type="text" id="txKategori" class="form-control bg-light form-control-sm" placeholder="Otomatis..." readonly>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-secondary">Lokasi Rak</label>
+                        <input type="text" id="txLokasi" class="form-control bg-light form-control-sm" placeholder="Otomatis..." readonly>
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-4">
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-info">Stok Saat Ini</label>
+                        <input type="text" id="txStokSekarang" class="form-control bg-info-subtle fw-bold text-center text-dark" value="-" readonly>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-dark">Jumlah Perubahan</label>
+                        <input type="number" id="txJumlah" class="form-control fw-bold text-center text-primary" min="1" value="1" required>
+                    </div>
                 </div>
                 
                 <div class="row g-2">
@@ -64,7 +79,7 @@
     <div class="card card-custom border-0">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="card-title fw-bold m-0 text-secondary">Semua Data Stok</h6>
+                <h6 class="card-title fw-bold m-0 text-secondary">Semua Data Stok Terdaftar</h6>
                 <button onclick="muatDataStok()" class="btn btn-sm btn-outline-secondary">🔄 Refresh</button>
             </div>
             
@@ -78,7 +93,7 @@
     // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
     const API_URL = "https://script.google.com/macros/s/AKfycbwDucogQ2PHEaODrG8hIhddfl9MzhiKlaruLYLE5ajU/dev"; 
 
-    let masterDataBarang = []; // Tempat menyimpan data dari Google Sheets global
+    let masterDataBarang = []; // Database lokal untuk pencarian cepat
 
     document.addEventListener("DOMContentLoaded", muatDataStok);
 
@@ -96,7 +111,7 @@
             inisialisasiPencarianForm();
 
         } catch (error) {
-            document.getElementById('loading').innerText = 'Gagal memuat data.';
+            document.getElementById('loading').innerText = 'Gagal memuat data dari database.';
             console.error(error);
         }
     }
@@ -120,24 +135,25 @@
         });
     }
 
-    // 3. Logika Pencarian Nama Barang di Kolom Input Form
+    // 3. Logika Pencarian Dinamis pada Kolom Nama Barang
     function inisialisasiPencarianForm() {
-        const inputCari = document.getElementById('cariNamaInput');
+        const inputNama = document.getElementById('txNamaBarang');
         const dropdown = document.getElementById('dropdownHasil');
 
-        inputCari.addEventListener('input', function() {
+        inputNama.addEventListener('input', function() {
             let keyword = this.value.toLowerCase();
             dropdown.innerHTML = '';
 
+            // Jika kolom nama dikosongkan, reset kolom otomatis lainnya
             if (keyword.length === 0) {
                 dropdown.classList.add('d-none');
+                resetFormOtomatis();
                 return;
             }
 
-            // Filter barang berdasarkan nama atau ID
+            // Filter data berdasarkan nama barang
             let hasilFilter = masterDataBarang.filter(item => 
-                item.nama.toLowerCase().includes(keyword) || 
-                item.id.toLowerCase().includes(keyword)
+                item.nama.toLowerCase().includes(keyword)
             );
 
             if (hasilFilter.length > 0) {
@@ -146,61 +162,66 @@
                     let tombolItem = document.createElement('button');
                     tombolItem.type = 'button';
                     tombolItem.className = 'list-group-item list-group-item-action text-start small';
-                    tombolItem.innerHTML = `<b>${item.nama}</b> <span class="text-muted">(${item.id}) - Stok: ${item.stok}</span>`;
+                    tombolItem.innerHTML = `<b>${item.nama}</b> <span class="text-muted">(${item.id})</span>`;
                     
-                    // Jika item dropdown diklik
+                    // Aksi ketika salah satu nama barang dipilih dari daftar pencarian
                     tombolItem.addEventListener('click', function() {
-                        pilihBarang(item);
+                        isiDataBarangOtomatis(item);
                     });
                     
                     dropdown.appendChild(tombolItem);
                 });
             } else {
-                dropdown.innerHTML = '<div class="list-group-item text-muted small">Barang tidak ditemukan</div>';
+                dropdown.innerHTML = '<div class="list-group-item text-muted small">Nama barang tidak ditemukan</div>';
                 dropdown.classList.remove('d-none');
+                resetFormOtomatis();
             }
         });
 
-        // Sembunyikan dropdown jika klik di luar area input
+        // Tutup dropdown jika klik di area luar
         document.addEventListener('click', function(e) {
-            if (e.target !== inputCari) {
+            if (e.target !== inputNama) {
                 dropdown.classList.add('d-none');
             }
         });
     }
 
-    // 4. Aksi Ketika Nama Barang Dipilih dari Dropdown Pencarian
-    function pilihBarang(item) {
-        document.getElementById('cariNamaInput').value = item.nama;
+    // 4. Memasukkan Data secara Otomatis ke Kolom Lain setelah Nama Barang Dipilih
+    function isiDataBarangOtomatis(item) {
+        document.getElementById('txNamaBarang').value = item.nama;
         document.getElementById('txId').value = item.id;
-        
-        // Tampilkan kotak info barang terpilih
-        document.getElementById('lblNamaBarang').innerText = item.nama;
-        document.getElementById('lblIdBarang').innerText = item.id;
-        document.getElementById('lblStokSekarang').innerText = item.stok;
-        document.getElementById('lblLokasiBarang').innerText = item.lokasi;
-        document.getElementById('infoBarangTerpilih').classList.remove('d-none');
+        document.getElementById('txKategori').value = item.kategori;
+        document.getElementById('txLokasi').value = item.lokasi;
+        document.getElementById('txStokSekarang').value = item.stok + " pcs";
         
         document.getElementById('dropdownHasil').classList.add('d-none');
+    }
+
+    // Fungsi Pembantu untuk Mengosongkan Kolom jika nama barang dihapus
+    function resetFormOtomatis() {
+        document.getElementById('txId').value = "";
+        document.getElementById('txKategori').value = "";
+        document.getElementById('txLokasi').value = "";
+        document.getElementById('txStokSekarang').value = "-";
     }
 
     // 5. Fungsi Mengirim Transaksi Update Stok ke Google Sheets
     async function kirimTransaksi(jenis) {
         const id = document.getElementById('txId').value;
+        const nama = document.getElementById('txNamaBarang').value;
         const jumlah = document.getElementById('txJumlah').value;
-        const namaBarang = document.getElementById('lblNamaBarang').innerText;
 
         if (!id) {
-            alert('Silakan cari dan pilih barang terlebih dahulu melalui kolom pencarian!');
+            alert('Silakan cari dan pilih Nama Barang terlebih dahulu melalui kolom pencarian!');
             return;
         }
 
         if (!jumlah || jumlah < 1) {
-            alert('Masukkan jumlah perubahan stok yang valid!');
+            alert('Masukkan jumlah transaksi yang valid!');
             return;
         }
 
-        if (confirm(`Apakah Anda yakin ingin mencatat barang [ ${jenis.toUpperCase()} ] untuk "${namaBarang}" sebanyak ${jumlah} pcs?`)) {
+        if (confirm(`Konfirmasi pencatatan barang [ ${jenis.toUpperCase()} ]\n\nBarang: ${nama}\nJumlah: ${jumlah} pcs`)) {
             try {
                 let response = await fetch(API_URL, {
                     method: 'POST',
@@ -210,15 +231,14 @@
                 
                 alert(hasil.status);
                 
-                // Reset Form & Sembunyikan Info
+                // Reset seluruh form ke keadaan awal
                 document.getElementById('formTransaksi').reset();
-                document.getElementById('infoBarangTerpilih').classList.add('d-none');
-                document.getElementById('txId').value = "";
+                resetFormOtomatis();
                 
-                // Muat ulang data terbaru dari Google Sheets
+                // Perbarui database lokal dan daftar visual bawah
                 muatDataStok();
             } catch (error) {
-                alert('Gagal memperbarui stok ke server.');
+                alert('Gagal memproses perubahan stok ke Google Sheets.');
                 console.error(error);
             }
         }
