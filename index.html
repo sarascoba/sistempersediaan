@@ -91,7 +91,7 @@
                         <div class="row g-2">
                             <div class="col-4 mb-2">
                                 <label class="form-label small fw-bold text-primary">ID Barang (Otomatis)</label>
-                                <input type="text" id="newId" class="form-control form-control-sm input-terkunci" readonly tabindex="-1">
+                                <input type="text" id="newId" class="form-control form-control-sm input-terkunci" readonly>
                             </div>
                             <div class="col-8 mb-2">
                                 <label class="form-label small fw-bold text-dark">Nama Barang</label>
@@ -158,18 +158,15 @@
     let masterDataBarang = []; 
 
     document.addEventListener("DOMContentLoaded", () => {
-        generasiIdBarangOtomatis(); // LANGSUNG BUAT ID INSTAN SAAT DI BUKA (Mencegah Error Validasi Kosong)
         muatDataStok();
     });
 
-    // Perbaikan logika pembentukan nomor urut ID
     function generasiIdBarangOtomatis() {
         const waktu = new Date();
         const tahun = waktu.getFullYear().toString().substr(-2);
         const bulan = ("0" + (waktu.getMonth() + 1)).slice(-2);
         const tanggal = ("0" + waktu.getDate()).slice(-2);
         
-        // Menggunakan fallback jika masterDataBarang belum selesai di-download
         const nomorUrut = (masterDataBarang && masterDataBarang.length) ? masterDataBarang.length + 1 : 1;
         const tigaDigitUrut = ("00" + nomorUrut).slice(-3); 
         
@@ -186,7 +183,7 @@
             document.getElementById('loading').style.display = 'none';
             renderListUtama(masterDataBarang);
             inisialisasiPencarianForm();
-            generasiIdBarangOtomatis(); // Perbarui ulang nomor urutnya begitu sheets sukses terbaca
+            generasiIdBarangOtomatis(); 
         } catch (error) {
             document.getElementById('loading').innerText = 'Gagal sinkronisasi.';
         }
@@ -294,6 +291,7 @@
     }
 
     async function tambahBarangBaru() {
+        // Mengambil langsung value asli dari elemen DOM (Menghindari bug .reset())
         const id = document.getElementById('newId').value.trim();
         const nama = document.getElementById('newNama').value.trim();
         const merk = document.getElementById('newMerk').value.trim();
@@ -305,8 +303,8 @@
         const sumberDana = document.getElementById('newSumberDana').value.trim();
         const stok = document.getElementById('newStok').value;
 
-        // Validasi utama mendeteksi id tidak boleh kosong
-        if (!id || !nama || !merk || !satuan || !expired) { 
+        // Validasi ketat di tingkat variabel mentah
+        if (!nama || !merk || !satuan || !expired || !id) { 
             alert('Kolom Nama, Merk, Satuan, dan Expired Wajib Diisi!'); 
             return; 
         }
@@ -328,8 +326,19 @@
             btn.disabled = false; btn.innerText = "💾 Simpan Item ke Database";
 
             if(!hasil.status.includes("Error")) {
-                document.getElementById('formBarangBaru').reset();
-                muatDataStok(); 
+                // Bersihkan data ketikan secara manual agar ID aman tidak ter-reset paksa
+                document.getElementById('newNama').value = "";
+                document.getElementById('newMerk').value = "";
+                document.getElementById('newSpesifikasi').value = "";
+                document.getElementById('newSatuan').value = "";
+                document.getElementById('newNoBatch').value = "";
+                document.getElementById('newExpired').value = "";
+                document.getElementById('newIzinEdar').value = "";
+                document.getElementById('newSumberDana').value = "";
+                document.getElementById('newStok').value = "0";
+
+                await muatDataStok(); 
+                
                 let firstTab = new bootstrap.Tab(document.getElementById('update-tab'));
                 firstTab.show();
             }
