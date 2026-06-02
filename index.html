@@ -12,7 +12,6 @@
         .nav-pills .nav-link { color: #51585e; font-weight: bold; background-color: transparent; }
         .nav-pills .nav-link.active { color: #fff; background-color: #0d6efd; }
         .info-label { font-size: 0.75rem; font-weight: bold; color: #6c757d; }
-        /* Gaya visual khusus untuk kolom yang dikunci sistem */
         .input-terkunci { background-color: #e9ecef !important; color: #495057 !important; font-weight: bold; cursor: not-allowed; }
     </style>
 </head>
@@ -159,19 +158,20 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         muatDataStok();
-        generasiIdBarangOtomatis(); 
     });
 
-    // Otomatisasi pembentukan ID oleh JavaScript sistem
+    // Otomatisasi pembentukan ID berurutan dari 001 oleh sistem
     function generasiIdBarangOtomatis() {
         const waktu = new Date();
         const tahun = waktu.getFullYear().toString().substr(-2);
         const bulan = ("0" + (waktu.getMonth() + 1)).slice(-2);
         const tanggal = ("0" + waktu.getDate()).slice(-2);
         
-        const angkaAcak = Math.floor(100 + Math.random() * 900); 
+        // Nomor urut dinamis berdasarkan jumlah data riil dari sheets
+        const nomorUrut = masterDataBarang.length + 1;
+        const tigaDigitUrut = ("00" + nomorUrut).slice(-3); 
         
-        const idHasil = `BRG-${tahun}${bulan}${tanggal}-${angkaAcak}`;
+        const idHasil = `BRG-${tahun}${bulan}${tanggal}-${tigaDigitUrut}`;
         document.getElementById('newId').value = idHasil;
     }
 
@@ -184,6 +184,7 @@
             document.getElementById('loading').style.display = 'none';
             renderListUtama(masterDataBarang);
             inisialisasiPencarianForm();
+            generasiIdBarangOtomatis(); // Dipanggil setelah data terunduh agar sinkron
         } catch (error) {
             document.getElementById('loading').innerText = 'Gagal sinkronisasi.';
         }
@@ -322,8 +323,7 @@
 
             if(!hasil.status.includes("Error")) {
                 document.getElementById('formBarangBaru').reset();
-                generasiIdBarangOtomatis(); // ID otomatis langsung berubah ke kode baru pasca-simpan
-                muatDataStok();
+                muatDataStok(); // Memuat data ulang sekaligus memperbarui nomor urut ID selanjutnya
                 let firstTab = new bootstrap.Tab(document.getElementById('update-tab'));
                 firstTab.show();
             }
