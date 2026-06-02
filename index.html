@@ -1,10 +1,3 @@
-Bisa sekali! Membuat ID Barang otomatis adalah ide yang sangat bagus untuk menghindari kesalahan input manusia (seperti ID ganda atau salah ketik) dan mempercepat kerja petugas di lapangan.
-
-Cara terbaik dan paling rapi untuk menerapkannya adalah dengan menggabungkan Kode Inisial (misal: BRG-) + Tanggal Hari Ini + Angka Acak. Dengan kombinasi ini, ID Barang akan langsung terbentuk secara otomatis begitu halaman web dibuka, tanpa perlu mengecek database terlebih dahulu.
-
-Berikut adalah file index.html yang sudah diperbarui. Perubahannya fokus pada Tab Registrasi Barang Baru, di mana kolom ID Barang sekarang sudah dikunci (readonly) dan akan terisi kode unik otomatis setiap kali form di-reset atau halaman dimuat.
-
-HTML
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -19,6 +12,8 @@ HTML
         .nav-pills .nav-link { color: #51585e; font-weight: bold; background-color: transparent; }
         .nav-pills .nav-link.active { color: #fff; background-color: #0d6efd; }
         .info-label { font-size: 0.75rem; font-weight: bold; color: #6c757d; }
+        /* Gaya visual khusus untuk kolom yang dikunci sistem */
+        .input-terkunci { background-color: #e9ecef !important; color: #495057 !important; font-weight: bold; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -54,14 +49,14 @@ HTML
 
                         <div class="p-3 bg-light rounded border mb-3">
                             <div class="row g-2">
-                                <div class="col-6"><span class="info-label">ID BARANG</span><input type="text" id="txId" class="form-control form-control-sm" readonly></div>
-                                <div class="col-6"><span class="info-label">MERK</span><input type="text" id="txMerk" class="form-control form-control-sm" readonly></div>
-                                <div class="col-12"><span class="info-label">SPESIFIKASI</span><input type="text" id="txSpesifikasi" class="form-control form-control-sm" readonly></div>
-                                <div class="col-4"><span class="info-label">SATUAN</span><input type="text" id="txSatuan" class="form-control form-control-sm" readonly></div>
-                                <div class="col-4"><span class="info-label">NO BATCH</span><input type="text" id="txNoBatch" class="form-control form-control-sm" readonly></div>
-                                <div class="col-4"><span class="info-label">EXPIRED DATE</span><input type="text" id="txExpired" class="form-control form-control-sm text-danger fw-bold" readonly></div>
-                                <div class="col-6"><span class="info-label">IZIN EDAR</span><input type="text" id="txIzinEdar" class="form-control form-control-sm" readonly></div>
-                                <div class="col-6"><span class="info-label">SUMBER DANA</span><input type="text" id="txSumberDana" class="form-control form-control-sm" readonly></div>
+                                <div class="col-6"><span class="info-label">ID BARANG</span><input type="text" id="txId" class="form-control form-control-sm input-terkunci" readonly></div>
+                                <div class="col-6"><span class="info-label">MERK</span><input type="text" id="txMerk" class="form-control form-control-sm input-terkunci" readonly></div>
+                                <div class="col-12"><span class="info-label">SPESIFIKASI</span><input type="text" id="txSpesifikasi" class="form-control form-control-sm input-terkunci" readonly></div>
+                                <div class="col-4"><span class="info-label">SATUAN</span><input type="text" id="txSatuan" class="form-control form-control-sm input-terkunci" readonly></div>
+                                <div class="col-4"><span class="info-label">NO BATCH</span><input type="text" id="txNoBatch" class="form-control form-control-sm input-terkunci" readonly></div>
+                                <div class="col-4"><span class="info-label">EXPIRED DATE</span><input type="text" id="txExpired" class="form-control form-control-sm text-danger fw-bold input-terkunci" readonly></div>
+                                <div class="col-6"><span class="info-label">IZIN EDAR</span><input type="text" id="txIzinEdar" class="form-control form-control-sm input-terkunci" readonly></div>
+                                <div class="col-6"><span class="info-label">SUMBER DANA</span><input type="text" id="txSumberDana" class="form-control form-control-sm input-terkunci" readonly></div>
                             </div>
                         </div>
 
@@ -96,8 +91,8 @@ HTML
                     <form id="formBarangBaru">
                         <div class="row g-2">
                             <div class="col-4 mb-2">
-                                <label class="form-label small fw-bold text-secondary">ID Barang (Otomatis)</label>
-                                <input type="text" id="newId" class="form-control form-control-sm bg-light fw-bold text-primary" readonly>
+                                <label class="form-label small fw-bold text-primary">ID Barang (Otomatis)</label>
+                                <input type="text" id="newId" class="form-control form-control-sm input-terkunci" readonly tabindex="-1">
                             </div>
                             <div class="col-8 mb-2">
                                 <label class="form-label small fw-bold text-dark">Nama Barang</label>
@@ -164,17 +159,16 @@ HTML
 
     document.addEventListener("DOMContentLoaded", () => {
         muatDataStok();
-        generasiIdBarangOtomatis(); // Buat ID pertama kali saat buka web
+        generasiIdBarangOtomatis(); 
     });
 
-    // Fungsi Membuat ID Otomatis (Contoh Hasil: BRG-260602-839)
+    // Otomatisasi pembentukan ID oleh JavaScript sistem
     function generasiIdBarangOtomatis() {
         const waktu = new Date();
         const tahun = waktu.getFullYear().toString().substr(-2);
         const bulan = ("0" + (waktu.getMonth() + 1)).slice(-2);
         const tanggal = ("0" + waktu.getDate()).slice(-2);
         
-        // Membuat 3 angka acak di belakang agar benar-benar unik
         const angkaAcak = Math.floor(100 + Math.random() * 900); 
         
         const idHasil = `BRG-${tahun}${bulan}${tanggal}-${angkaAcak}`;
@@ -328,7 +322,7 @@ HTML
 
             if(!hasil.status.includes("Error")) {
                 document.getElementById('formBarangBaru').reset();
-                generasiIdBarangOtomatis(); // Regenerasi ID Baru lagi setelah sukses disimpan
+                generasiIdBarangOtomatis(); // ID otomatis langsung berubah ke kode baru pasca-simpan
                 muatDataStok();
                 let firstTab = new bootstrap.Tab(document.getElementById('update-tab'));
                 firstTab.show();
