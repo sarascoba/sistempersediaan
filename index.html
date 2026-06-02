@@ -158,6 +158,7 @@
     let masterDataBarang = []; 
 
     document.addEventListener("DOMContentLoaded", () => {
+        generasiIdBarangOtomatis(); // LANGSUNG GENERATE DI AWAL REFRESH (GARANSI TIDAK KOSONG)
         muatDataStok();
     });
 
@@ -167,8 +168,15 @@
         const bulan = ("0" + (waktu.getMonth() + 1)).slice(-2);
         const tanggal = ("0" + waktu.getDate()).slice(-2);
         
-        const nomorUrut = (masterDataBarang && masterDataBarang.length) ? masterDataBarang.length + 1 : 1;
-        const tigaDigitUrut = ("00" + nomorUrut).slice(-3); 
+        // Proteksi jika data sheet offline/gagal ambil, buat nomor acak aman temporary, jika aman gunakan nomor urut.
+        let tigaDigitUrut;
+        if (masterDataBarang && masterDataBarang.length > 0) {
+            const nomorUrut = masterDataBarang.length + 1;
+            tigaDigitUrut = ("00" + nomorUrut).slice(-3); 
+        } else {
+            // Angka fallback aman jika koneksi sheet terputus agar input tidak crash
+            tigaDigitUrut = Math.floor(100 + Math.random() * 900).toString();
+        }
         
         const idHasil = `BRG-${tahun}${bulan}${tanggal}-${tigaDigitUrut}`;
         document.getElementById('newId').value = idHasil;
@@ -183,9 +191,10 @@
             document.getElementById('loading').style.display = 'none';
             renderListUtama(masterDataBarang);
             inisialisasiPencarianForm();
-            generasiIdBarangOtomatis(); 
+            generasiIdBarangOtomatis(); // Sinkronkan ulang nomor urut fix
         } catch (error) {
-            document.getElementById('loading').innerText = 'Gagal sinkronisasi.';
+            document.getElementById('loading').innerText = 'Gagal sinkronisasi data.';
+            generasiIdBarangOtomatis(); // Jaga-jaga ID tetap terisi meskipun fetch gagal
         }
     }
 
@@ -291,7 +300,6 @@
     }
 
     async function tambahBarangBaru() {
-        // Mengambil langsung value asli dari elemen DOM (Menghindari bug .reset())
         const id = document.getElementById('newId').value.trim();
         const nama = document.getElementById('newNama').value.trim();
         const merk = document.getElementById('newMerk').value.trim();
@@ -303,7 +311,6 @@
         const sumberDana = document.getElementById('newSumberDana').value.trim();
         const stok = document.getElementById('newStok').value;
 
-        // Validasi ketat di tingkat variabel mentah
         if (!nama || !merk || !satuan || !expired || !id) { 
             alert('Kolom Nama, Merk, Satuan, dan Expired Wajib Diisi!'); 
             return; 
@@ -326,7 +333,6 @@
             btn.disabled = false; btn.innerText = "💾 Simpan Item ke Database";
 
             if(!hasil.status.includes("Error")) {
-                // Bersihkan data ketikan secara manual agar ID aman tidak ter-reset paksa
                 document.getElementById('newNama').value = "";
                 document.getElementById('newMerk').value = "";
                 document.getElementById('newSpesifikasi').value = "";
@@ -342,7 +348,12 @@
                 let firstTab = new bootstrap.Tab(document.getElementById('update-tab'));
                 firstTab.show();
             }
-        } catch (error) { alert('Gagal menyimpan.'); btn.disabled = false; }
+        } catch (error) { 
+            alert('Gagal menyimpan ke database. Silakan periksa koneksi Apps Script Anda.'); 
+            btn.disabled = false; 
+            btn.innerText = "💾 Simpan Item ke Database";
+            generasiIdBarangOtomatis(); // Pastikan ID tidak hilang jika error ditangkap
+        }
     }
 </script>
 </body>
