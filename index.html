@@ -153,22 +153,24 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    // MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI
     const API_URL = "URL_WEB_APP_ANDA_DISINI"; 
     let masterDataBarang = []; 
 
     document.addEventListener("DOMContentLoaded", () => {
+        generasiIdBarangOtomatis(); // LANGSUNG BUAT ID INSTAN SAAT DI BUKA (Mencegah Error Validasi Kosong)
         muatDataStok();
     });
 
-    // Otomatisasi pembentukan ID berurutan dari 001 oleh sistem
+    // Perbaikan logika pembentukan nomor urut ID
     function generasiIdBarangOtomatis() {
         const waktu = new Date();
         const tahun = waktu.getFullYear().toString().substr(-2);
         const bulan = ("0" + (waktu.getMonth() + 1)).slice(-2);
         const tanggal = ("0" + waktu.getDate()).slice(-2);
         
-        // Nomor urut dinamis berdasarkan jumlah data riil dari sheets
-        const nomorUrut = masterDataBarang.length + 1;
+        // Menggunakan fallback jika masterDataBarang belum selesai di-download
+        const nomorUrut = (masterDataBarang && masterDataBarang.length) ? masterDataBarang.length + 1 : 1;
         const tigaDigitUrut = ("00" + nomorUrut).slice(-3); 
         
         const idHasil = `BRG-${tahun}${bulan}${tanggal}-${tigaDigitUrut}`;
@@ -184,7 +186,7 @@
             document.getElementById('loading').style.display = 'none';
             renderListUtama(masterDataBarang);
             inisialisasiPencarianForm();
-            generasiIdBarangOtomatis(); // Dipanggil setelah data terunduh agar sinkron
+            generasiIdBarangOtomatis(); // Perbarui ulang nomor urutnya begitu sheets sukses terbaca
         } catch (error) {
             document.getElementById('loading').innerText = 'Gagal sinkronisasi.';
         }
@@ -303,7 +305,11 @@
         const sumberDana = document.getElementById('newSumberDana').value.trim();
         const stok = document.getElementById('newStok').value;
 
-        if (!id || !nama || !merk || !satuan || !expired) { alert('Kolom Nama, Merk, Satuan, dan Expired Wajib Diisi!'); return; }
+        // Validasi utama mendeteksi id tidak boleh kosong
+        if (!id || !nama || !merk || !satuan || !expired) { 
+            alert('Kolom Nama, Merk, Satuan, dan Expired Wajib Diisi!'); 
+            return; 
+        }
 
         try {
             let btn = document.querySelector("button[onclick='tambahBarangBaru()']");
@@ -319,11 +325,11 @@
             });
             let hasil = await response.json();
             alert(hasil.status);
-            btn.disabled = false; btn.innerText = "💾 Simpan Barang Baru";
+            btn.disabled = false; btn.innerText = "💾 Simpan Item ke Database";
 
             if(!hasil.status.includes("Error")) {
                 document.getElementById('formBarangBaru').reset();
-                muatDataStok(); // Memuat data ulang sekaligus memperbarui nomor urut ID selanjutnya
+                muatDataStok(); 
                 let firstTab = new bootstrap.Tab(document.getElementById('update-tab'));
                 firstTab.show();
             }
