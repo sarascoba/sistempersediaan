@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Informasi Manajemen Barang Puskesmas Makasar</title>
+    <title>Sistem Inventaris Logistik Puskesmas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f4f6f9; }
@@ -17,21 +17,56 @@
         .table th { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .table td { font-size: 0.9rem; vertical-align: middle; }
 
-        /* AREA DOKUMEN BAST (TERSEMBUNYI DI LAYAR WEB UTAMA) */
-        #dokumenBast { display: none; background: white; font-family: 'Times New Roman', Times, serif; color: black; line-height: 1.4; }
-        .bast-header { border-bottom: 3px double #000; padding-bottom: 5px; margin-bottom: 15px; text-align: center; }
-        .bast-title { font-size: 1.1rem; font-weight: bold; text-decoration: underline; text-transform: uppercase; margin-bottom: 15px; }
-        .table-bast { border-collapse: collapse; width: 100%; margin-top: 10px; margin-bottom: 15px; }
+        /* =========================================================================
+           STYLE KOP RESMI PUSKESMAS MAKASAR SESUAI UP-TO-DATE TEMPLATE
+           ========================================================================= */
+        #dokumenBast { display: none; background: white; font-family: Arial, Helvetica, sans-serif; color: black; line-height: 1.3; }
+        
+        .bast-kop-container { 
+            display: flex; 
+            align-items: center; 
+            border-bottom: 4px double #000; 
+            padding-bottom: 8px; 
+            margin-bottom: 20px; 
+        }
+        .bast-logo-dki { 
+            width: 80px; 
+            height: auto; 
+            margin-right: 20px;
+            object-fit: contain;
+        }
+        .bast-teks-kop { 
+            flex-grow: 1; 
+            text-align: center; 
+            margin-right: 80px; /* Menyeimbangkan posisi teks tengah akibat logo kiri */
+        }
+        .bast-teks-kop h5 { font-size: 1rem; margin: 0; font-weight: bold; letter-spacing: 0.5px; }
+        .bast-teks-kop h4 { font-size: 1.1rem; margin: 2px 0; font-weight: bold; letter-spacing: 0.5px; }
+        .bast-teks-kop h3 { font-size: 1.3rem; margin: 2px 0; font-weight: bold; letter-spacing: 1px; }
+        .bast-teks-kop p { font-size: 0.85rem; margin: 1px 0; color: #000; }
+        
+        .bast-title { font-size: 1.15rem; font-weight: bold; text-decoration: underline; text-transform: uppercase; margin-top: 15px; margin-bottom: 20px; text-align: center; font-family: 'Times New Roman', Times, serif; }
+        .table-bast { border-collapse: collapse; width: 100%; margin-top: 15px; margin-bottom: 15px; font-family: 'Times New Roman', Times, serif; }
         .table-bast th, .table-bast td { border: 1px solid black; padding: 6px; font-size: 0.95rem; }
-        .ttd-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px; page-break-inside: avoid; }
+        .ttd-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; page-break-inside: avoid; font-family: 'Times New Roman', Times, serif; }
         .ttd-box { text-align: center; font-size: 0.95rem; }
 
-        /* CSS KHUSUS SAAT TOMBOL PRINT/CETAK DIAKTIFKAN */
+        /* Sembunyikan elemen web saat cetak, tampilkan format dokumen A4 resmi */
         @media print {
             body { background-color: white; }
-            .container, #logistikTab, .tab-content, .card, nav, button { display: none !important; } /* Sembunyikan semua elemen web */
-            #dokumenBast { display: block !important; padding: 20px; } /* Munculkan hanya kertas dokumen BAST */
-            @page { size: A4; margin: 2cm; }
+            .container, #logistikTab, .tab-content, .card, button { display: none !important; }
+            #dokumenBast { display: block !important; padding: 10px 20px; }
+            #bastPilihanPuskesmas {
+                border: none !important;
+                outline: none !important;
+                -webkit-appearance: none !important;
+                -moz-appearance: none !important;
+                appearance: none !important;
+                background: transparent !important;
+                color: black !important;
+                font-weight: bold !important;
+            }
+            @page { size: A4; margin: 1.5cm 2cm; }
         }
     </style>
 </head>
@@ -39,8 +74,8 @@
 
 <div class="container py-4" style="max-width: 750px;">
     <div class="text-center mb-4">
-        <h3 class="fw-bold text-primary">SIMBA Makasar</h3>
-        <p class="text-muted small">Sistem Informasi Manajemen Barang Puskesmas Makasar</p>
+        <h3 class="fw-bold text-primary">📦 LogistikKu</h3>
+        <p class="text-muted small">Sistem Manajemen Logistik & Distribusi Barang</p>
     </div>
 
     <ul class="nav nav-pills mb-4 justify-content-center bg-white p-1 rounded shadow-sm" id="logistikTab" role="tablist">
@@ -59,7 +94,6 @@
                 <div class="card-body p-4">
                     <h5 class="card-title fw-bold mb-3 text-secondary">📥 / 📤 Update & Pemakaian Stok</h5>
                     <form id="formTransaksi">
-                        
                         <div class="mb-3 position-relative">
                             <label class="form-label small fw-bold text-dark">Nama Barang (Ketik untuk Mencari)</label>
                             <input type="text" id="txNamaBarang" class="form-control" placeholder="Ketik nama item..." autocomplete="off">
@@ -91,15 +125,9 @@
                         </div>
                         
                         <div class="row g-2">
-                            <div class="col-4">
-                                <button type="button" onclick="kirimTransaksi('masuk')" class="btn btn-success w-100 fw-bold py-2">📥 Tambah Stok</button>
-                            </div>
-                            <div class="col-4">
-                                <button type="button" onclick="kirimTransaksi('keluar')" class="btn btn-danger w-100 fw-bold py-2">📤 Catat Keluar</button>
-                            </div>
-                            <div class="col-4">
-                                <button type="button" onclick="siapkanDanCetakBast()" class="btn btn-dark w-100 fw-bold py-2">🖨️ Cetak BAST</button>
-                            </div>
+                            <div class="col-4"><button type="button" onclick="kirimTransaksi('masuk')" class="btn btn-success w-100 fw-bold py-2">📥 Tambah Stok</button></div>
+                            <div class="col-4"><button type="button" onclick="kirimTransaksi('keluar')" class="btn btn-danger w-100 fw-bold py-2">📤 Catat Keluar</button></div>
+                            <div class="col-4"><button type="button" onclick="siapkanDanCetakBast()" class="btn btn-dark w-100 fw-bold py-2">🖨️ Cetak BAST</button></div>
                         </div>
                     </form>
                 </div>
@@ -117,16 +145,16 @@
                                 <input type="text" id="newId" class="form-control form-control-sm input-terkunci" readonly>
                             </div>
                             <div class="col-8 mb-2">
-                                <label class="form-label small fw-bold text-dark">Nama Barang</label>
-                                <input type="text" id="newNama" class="form-control form-control-sm" placeholder="Nama item" required>
+                                <label class="form-label small fw-bold text-dark">Nama Barang <span class="text-danger">*</span></label>
+                                <input type="text" id="newNama" class="form-control form-control-sm" placeholder="Contoh: Masker Medis" required>
                             </div>
                             <div class="col-6 mb-2">
-                                <label class="form-label small fw-bold text-dark">Merk</label>
-                                <input type="text" id="newMerk" class="form-control form-control-sm" placeholder="Sensi" required>
+                                <label class="form-label small fw-bold text-dark">Merk <span class="text-danger">*</span></label>
+                                <input type="text" id="newMerk" class="form-control form-control-sm" placeholder="Contoh: Sensi" required>
                             </div>
                             <div class="col-6 mb-2">
-                                <label class="form-label small fw-bold text-dark">Satuan</label>
-                                <input type="text" id="newSatuan" class="form-control form-control-sm" placeholder="Box, Pcs" required>
+                                <label class="form-label small fw-bold text-dark">Satuan <span class="text-danger">*</span></label>
+                                <input type="text" id="newSatuan" class="form-control form-control-sm" placeholder="Contoh: Box / Pcs" required>
                             </div>
                             <div class="col-12 mb-2">
                                 <label class="form-label small fw-bold text-dark">Spesifikasi</label>
@@ -137,7 +165,7 @@
                                 <input type="text" id="newNoBatch" class="form-control form-control-sm" placeholder="BCH12345">
                             </div>
                             <div class="col-6 mb-2">
-                                <label class="form-label small fw-bold text-dark">Expired Date</label>
+                                <label class="form-label small fw-bold text-dark">Expired Date <span class="text-danger">*</span></label>
                                 <input type="date" id="newExpired" class="form-control form-control-sm" required>
                             </div>
                             <div class="col-6 mb-3">
@@ -185,19 +213,24 @@
 </div>
 
 <div id="dokumenBast">
-    <div class="bast-header">
-        <h5 class="m-0 fw-bold" style="letter-spacing: 1px;">PEMERINTAH PROVINSI DAERAH KHUSUS IBUKOTA JAKARTA</h5>
-        <h4 class="m-0 fw-bold" style="letter-spacing: 1.5px;">DINAS KESEHATAN PUSKESMAS MAKASAR</h4>
-        <p class="m-0 small" style="font-family: Arial, sans-serif; font-size: 0.8rem;">Jl. Puskesmas No.13, Kecamatan Makasar, Jakarta Timur</p>
+    <div class="bast-kop-container">
+        <img class="bast-logo-dki" src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Coat_of_arms_of_Jakarta.svg" alt="Logo DKI Jakarta">
+        <div class="bast-teks-kop">
+            <h5>PEMERINTAH PROVINSI DAERAH KHUSUS IBUKOTA JAKARTA</h5>
+            <h4>DINAS KESEHATAN</h4>
+            <h3>PUSAT KESEHATAN MASYARAKAT MAKASAR</h3>
+            <p>Jl. Pusdiklat Depnaker No.4, Jakarta Timur Telepon 021-8003308</p>
+            <p>Fax. (021) 8003308 Web puskesmasmakasar.go.id</p>
+            <p>Email puskesmas.makasar@yahoo.com</p>
+            <p style="font-weight: bold; font-size: 0.85rem; text-align: right; padding-right: 15px; margin-top: 3px;">JAKARTA &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Kode Pos 13570</p>
+        </div>
     </div>
 
-    <div class="text-center">
-        <div class="bast-title">BERITA ACARA SERAH TERIMA<br>ALAT KESEHATAN HABIS PAKAI</div>
-    </div>
+    <div class="bast-title">BERITA ACARA SERAH TERIMA<br>ALAT KESEHATAN HABIS PAKAI</div>
 
-    <p id="bastNarasiPembuka">Pada Hari ____________ Tanggal ____ Bulan ____________ Tahun 2026, kami yang bertanda tangan di bawah ini:</p>
+    <p id="bastNarasiPembuka" style="font-size: 0.98rem;">Pada Hari ____________ Tanggal ____ Bulan ____________ Tahun 2026 , kami yang bertanda tangan dibawah ini :</p>
 
-    <table style="width: 100%; margin-bottom: 15px; font-size: 0.95rem;">
+    <table style="width: 100%; margin-bottom: 15px; font-size: 0.98rem; font-family: 'Times New Roman', Times, serif;">
         <tr>
             <td style="width: 15%; vertical-align: top;">Nama</td>
             <td style="width: 3%; vertical-align: top;">:</td>
@@ -209,7 +242,7 @@
             <td style="vertical-align: top;">Pengelola Gudang Alat Kesehatan Habis Pakai Puskesmas Makasar</td>
         </tr>
         <tr>
-            <td colspan="3" style="font-style: italic; padding-top: 5px; padding-bottom: 10px;">Disebut sebagai <b>PIHAK PERTAMA</b></td>
+            <td colspan="3" style="padding-top: 2px; padding-bottom: 12px;">Disebut <b>PIHAK PERTAMA</b></td>
         </tr>
         <tr>
             <td style="vertical-align: top;">Nama</td>
@@ -219,21 +252,31 @@
         <tr>
             <td style="vertical-align: top;">Jabatan</td>
             <td>:</td>
-            <td style="vertical-align: top;">Pengelola Alat Kesehatan Habis Pakai Puskesmas Pembantu Halim Perdanakusuma I</td>
+            <td style="vertical-align: top;">
+                Pengelola Alat Kesehatan Habis Pakai 
+                <select id="bastPilihanPuskesmas" style="border: none; font-family: 'Times New Roman', Times, serif; font-size: 0.95rem; font-weight: bold; background: transparent; padding: 0; margin: 0; cursor: pointer; -webkit-appearance: none; -moz-appearance: none; appearance: none; width: auto; max-width: 100%;">
+                    <option value="Puskesmas Makasar">Puskesmas Makasar</option>
+                    <option value="Puskesmas Pembantu Makasar">Puskesmas Pembantu Makasar</option>
+                    <option value="Puskesmas Pembantu Pinang Ranti">Puskesmas Pembantu Pinang Ranti</option>
+                    <option value="Puskesmas Pembantu Halim Perdana Kusuma I">Puskesmas Pembantu Halim Perdana Kusuma I</option>
+                    <option value="Puskesmas Pembantu Halim Perdana Kusuma II">Puskesmas Pembantu Halim Perdana Kusuma II</option>
+                    <option value="Puskesmas Pembantu Kebon Pala">Puskesmas Pembantu Kebon Pala</option>
+                    <option value="Puskesmas Pembantu Cipinang Melayu">Puskesmas Pembantu Cipinang Melayu</option>
+                </select>
+            </td>
         </tr>
         <tr>
-            <td colspan="3" style="font-style: italic; padding-top: 5px; padding-bottom: 10px;">Disebut sebagai <b>PIHAK KEDUA</b></td>
+            <td colspan="3" style="padding-top: 2px; padding-bottom: 12px;">Disebut <b>PIHAK KEDUA</b></td>
         </tr>
     </table>
 
-    <p style="text-align: justify; font-size: 0.95rem;">
-        Dengan ini menyatakan bahwa <b>PIHAK PERTAMA</b> telah menyerahkan alat kesehatan habis pakai yang terlampir di bawah ini 
-        untuk keperluan pendistribusian dari Gudang Alat Kesehatan Habis Pakai Puskesmas Makasar kepada <b>PIHAK KEDUA</b>:
+    <p style="text-align: justify; font-size: 0.98rem;">
+        Dengan ini menyatakan bahwa <b>PIHAK PERTAMA</b> telah menyerahkan alat kesehatan habis pakai yang terlampir keperluan untuk diberikan dari Gudang Alat Kesehatan Habis Pakai Puskesmas Makasar kepada <b>PIHAK KEDUA</b>
     </p>
 
     <table class="table-bast">
         <thead>
-            <tr style="background-color: #f2f2f2; text-align: center;">
+            <tr style="background-color: #f2f2f2; text-align: center; font-weight: bold;">
                 <th style="width: 8%;">No</th>
                 <th style="width: 20%;">ID Barang</th>
                 <th style="width: 40%;">Nama Item / Spesifikasi</th>
@@ -252,12 +295,11 @@
         </tbody>
     </table>
 
-    <p style="text-align: justify; font-size: 0.95rem;">
-        Demikian berita acara penyerahan alat kesehatan habis pakai ini dibuat dengan sebenar-benarnya untuk dapat dipergunakan 
-        sebagaimana mestinya dan ditandatangani oleh kedua belah pihak.
+    <p style="text-align: justify; font-size: 0.98rem;">
+        Demikian berita acara penyerahan alat kesehatan habis pakai dibuat dengan sebenar-benarnya dan ditanda tangani oleh kedua belah pihak.
     </p>
 
-    <div style="text-align: right; font-size: 0.95rem; margin-top: 20px;">
+    <div style="text-align: right; font-size: 0.98rem; margin-top: 25px;">
         Jakarta, <span id="bastTanggalCetak">___________ 2026</span>
     </div>
 
@@ -265,19 +307,19 @@
         <div class="ttd-box">
             Yang Menerima<br><b>PIHAK KEDUA</b>
             <div style="height: 65px;"></div>
-            ( ___________________________ )<br>NIP/NIK. ...........................................
+            ( ___________________________ )<br>NIP. ...........................................
         </div>
         <div class="ttd-box">
             Yang Menyerahkan<br><b>PIHAK PERTAMA</b>
             <div style="height: 65px;"></div>
             <b><u>apt. Mila Hanifah, S.Farm.</u></b><br>NIK. 102053199510242024051163
         </div>
-        <div class="ttd-box" style="margin-top: 20px;">
+        <div class="ttd-box" style="margin-top: 25px;">
             Mengetahui,<br>Kepala Puskesmas Pembantu
             <div style="height: 65px;"></div>
             ( ___________________________ )<br>NIP. ...........................................
         </div>
-        <div class="ttd-box" style="margin-top: 20px;">
+        <div class="ttd-box" style="margin-top: 25px;">
             Mengetahui,<br>Koordinator Farmasi
             <div style="height: 65px;"></div>
             ( ___________________________ )<br>NIP. ...........................................
@@ -288,11 +330,14 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    // =========================================================================
+    // WAJIB: GANTI URL DI BAWAH INI DENGAN TAUTAN WEB APP /exec APPS SCRIPT ANDA
+    // =========================================================================
     const API_URL = "https://script.google.com/macros/s/AKfycbwfAJC-Os16Q2jqpqP3s6fOjG6ERETC9Wi1olk_syRIkSdiKNxzmsKn19UPM8fDwL4jtg/exec"; 
+    
     let masterDataBarang = []; 
 
     document.addEventListener("DOMContentLoaded", () => {
-        generasiIdBarangOtomatis(); 
         muatDataStok();
     });
 
@@ -307,32 +352,34 @@
             const nomorUrut = masterDataBarang.length + 1;
             tigaDigitUrut = ("00" + nomorUrut).slice(-3); 
         } else {
-            tigaDigitUrut = Math.floor(100 + Math.random() * 900).toString();
+            tigaDigitUrut = "001";
         }
         const idHasil = `BRG-${tahun}${bulan}${tanggal}-${tigaDigitUrut}`;
-        document.getElementById('newId').value = idHasil;
+        const inputNewId = document.getElementById('newId');
+        if (inputNewId) inputNewId.value = idHasil;
     }
 
     async function muatDataStok() {
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('bodyTabelStok').innerHTML = '';
+        const loadingEl = document.getElementById('loading');
+        if (loadingEl) loadingEl.style.display = 'block';
         try {
             let response = await fetch(API_URL);
             masterDataBarang = await response.json();
-            document.getElementById('loading').style.display = 'none';
+            if (loadingEl) loadingEl.style.display = 'none';
             renderListUtama(masterDataBarang);
             inisialisasiPencarianForm();
             generasiIdBarangOtomatis(); 
         } catch (error) {
-            document.getElementById('loading').innerText = 'Gagal sinkronisasi data.';
+            if (loadingEl) loadingEl.innerText = 'Gagal sinkronisasi data dengan database Spreadsheet.';
             generasiIdBarangOtomatis(); 
         }
     }
 
     function renderListUtama(data) {
         const container = document.getElementById('bodyTabelStok');
+        if (!container) return;
         container.innerHTML = '';
-        if (data.length === 0) {
+        if (!data || data.length === 0) {
             container.innerHTML = `<tr><td colspan="4" class="text-center text-muted small py-3">Belum ada data inventaris terdaftar.</td></tr>`;
             return;
         }
@@ -360,13 +407,14 @@
     function inisialisasiPencarianForm() {
         const inputNama = document.getElementById('txNamaBarang');
         const dropdown = document.getElementById('dropdownHasil');
+        if (!inputNama || !dropdown) return;
 
         inputNama.addEventListener('input', function() {
             let keyword = this.value.toLowerCase();
             dropdown.innerHTML = '';
             if (keyword.length === 0) { dropdown.classList.add('d-none'); resetFormUpdateOtomatis(); return; }
 
-            let hasilFilter = masterDataBarang.filter(item => item.nama.toLowerCase().includes(keyword));
+            let hasilFilter = masterDataBarang.filter(item => item.nama && item.nama.toLowerCase().includes(keyword));
 
             if (hasilFilter.length > 0) {
                 dropdown.classList.remove('d-none');
@@ -380,12 +428,12 @@
                         document.getElementById('txNamaBarang').value = item.nama;
                         document.getElementById('txId').value = item.id;
                         document.getElementById('txMerk').value = item.merk;
-                        document.getElementById('txSpesifikasi').value = item.spesifikasi;
+                        document.getElementById('txSpesifikasi').value = item.spesifikasi || '';
                         document.getElementById('txSatuan').value = item.satuan;
-                        document.getElementById('txNoBatch').value = item.noBatch;
+                        document.getElementById('txNoBatch').value = item.noBatch || '';
                         document.getElementById('txExpired').value = item.expired;
-                        document.getElementById('txIzinEdar').value = item.izinEdar;
-                        document.getElementById('txSumberDana').value = item.sumberDana;
+                        document.getElementById('txIzinEdar').value = item.izinEdar || '';
+                        document.getElementById('txSumberDana').value = item.sumberDana || '';
                         document.getElementById('txStokSekarang').value = item.stok + " " + item.satuan;
                         dropdown.classList.add('d-none');
                     });
@@ -432,13 +480,10 @@
                 document.getElementById('formTransaksi').reset();
                 resetFormUpdateOtomatis();
                 muatDataStok();
-            } catch (error) { alert('Gagal memproses data.'); }
+            } catch (error) { alert('Gagal memproses transaksi.'); }
         }
     }
 
-    // =========================================================================
-    // LOGIKA AUTOFILL DATA TRANSAKSI KE LEMBAR DOKUMEN BAST SEBELUM DI-PRINT
-    // =========================================================================
     function siapkanDanCetakBast() {
         const id = document.getElementById('txId').value;
         const nama = document.getElementById('txNamaBarang').value;
@@ -448,16 +493,9 @@
         const satuan = document.getElementById('txSatuan').value;
         const spesifikasi = document.getElementById('txSpesifikasi').value || '';
 
-        if (!id) { 
-            alert('Silakan pilih barang terlebih dahulu melalui kolom pencarian sebelum mencetak BAST!'); 
-            return; 
-        }
-        if (!jumlah || jumlah < 1) { 
-            alert('Masukkan jumlah penyerahan barang yang valid!'); 
-            return; 
-        }
+        if (!id) { alert('Silakan pilih barang terlebih dahulu sebelum mencetak BAST!'); return; }
+        if (!jumlah || jumlah < 1) { alert('Masukkan jumlah penyerahan barang yang valid!'); return; }
 
-        // Tentukan Nama Hari dan Tanggal Real-time Indonesia untuk narasi pembuka
         const daftarHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
         const daftarBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
         
@@ -467,19 +505,14 @@
         const namaBulan = daftarBulan[dt.getMonth()];
         const thn = dt.getFullYear();
 
-        // Suntikkan teks narasi pembuka dokumen BAST
-        document.getElementById('bastNarasiPembuka').innerHTML = `Pada Hari <b>${namaHari}</b> Tanggal <b>${tgl}</b> Bulan <b>${namaBulan}</b> Tahun <b>${thn}</b>, kami yang bertanda tangan di bawah ini:`;
-        
-        // Suntikkan teks lokasi tanggal cetak bawah kanan
+        document.getElementById('bastNarasiPembuka').innerHTML = `Pada Hari <b>${namaHari}</b> Tanggal <b>${tgl}</b> Bulan <b>${namaBulan}</b> Tahun <b>${thn}</b> , kami yang bertanda tangan dibawah ini :`;
         document.getElementById('bastTanggalCetak').innerText = `${tgl} ${namaBulan} ${thn}`;
 
-        // Masukkan detail isi tabel barang yang diserahkan
         document.getElementById('bastIdBarang').innerText = id;
         document.getElementById('bastNamaBarang').innerHTML = `<b>${nama}</b> ${spesifikasi ? '<br><small style="font-size:0.8rem; color:#444;">Spesifikasi: '+spesifikasi+'</small>' : ''}`;
         document.getElementById('bastMerkBatch').innerText = `${merk} / ${batch}`;
         document.getElementById('bastJumlah').innerText = `${jumlah} ${satuan}`;
 
-        // Perintahkan browser membuka jendela cetak bawaan
         window.print();
     }
 
@@ -495,14 +528,14 @@
         const sumberDana = document.getElementById('newSumberDana').value.trim();
         const stok = document.getElementById('newStok').value;
 
-        if (!nama || !merk || !satuan || !expired || !id) { 
+        if (!nama || !merk || !satuan || !expired) { 
             alert('Kolom Nama, Merk, Satuan, dan Expired Wajib Diisi!'); 
             return; 
         }
 
         try {
             let btn = document.querySelector("button[onclick='tambahBarangBaru()']");
-            btn.disabled = true; btn.innerText = "⏳ Menyimpan...";
+            if(btn) { btn.disabled = true; btn.innerText = "⏳ Menyimpan..."; }
 
             let response = await fetch(API_URL, {
                 method: 'POST',
@@ -514,25 +547,19 @@
             });
             let hasil = await response.json();
             alert(hasil.status);
-            btn.disabled = false; btn.innerText = "💾 Simpan Item ke Database";
+            
+            if(btn) { btn.disabled = false; btn.innerText = "💾 Simpan Item ke Database"; }
 
-            if(!hasil.status.includes("Error")) {
-                document.getElementById('newNama').value = "";
-                document.getElementById('newMerk').value = "";
-                document.getElementById('newSpesifikasi').value = "";
-                document.getElementById('newSatuan').value = "";
-                document.getElementById('newNoBatch').value = "";
-                document.getElementById('newExpired').value = "";
-                document.getElementById('newIzinEdar').value = "";
-                document.getElementById('newSumberDana').value = "";
-                document.getElementById('newStok').value = "0";
+            if(hasil.status && !hasil.status.includes("Error")) {
+                document.getElementById('formBarangBaru').reset();
                 await muatDataStok(); 
                 let firstTab = new bootstrap.Tab(document.getElementById('update-tab'));
                 firstTab.show();
             }
         } catch (error) { 
-            alert('Gagal menyimpan.'); 
-            btn.disabled = false; btn.innerText = "💾 Simpan Item ke Database";
+            alert('Gagal menyimpan ke database. Silakan periksa koneksi Apps Script Anda.'); 
+            let btn = document.querySelector("button[onclick='tambahBarangBaru()']");
+            if(btn) { btn.disabled = false; btn.innerText = "💾 Simpan Item ke Database"; }
             generasiIdBarangOtomatis(); 
         }
     }
