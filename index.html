@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Inventaris Logistik Puskesmas</title>
+    <title>Sistem Informasi Manajemen Barang Puskesmas Makasar</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f4f6f9; }
@@ -48,7 +48,9 @@
         .bast-title { font-size: 1.15rem; font-weight: bold; text-decoration: underline; text-transform: uppercase; margin-top: 15px; margin-bottom: 20px; text-align: center; font-family: 'Times New Roman', Times, serif; }
         .table-bast { border-collapse: collapse; width: 100%; margin-top: 15px; margin-bottom: 15px; font-family: 'Times New Roman', Times, serif; }
         .table-bast th, .table-bast td { border: 1px solid black; padding: 6px; font-size: 0.95rem; }
-        .ttd-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; page-break-inside: avoid; font-family: 'Times New Roman', Times, serif; }
+        
+        /* Container Tanda Tangan */
+        .ttd-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px; page-break-inside: avoid; font-family: 'Times New Roman', Times, serif; }
         .ttd-box { text-align: center; font-size: 0.95rem; }
 
         /* Sembunyikan elemen web saat cetak, tampilkan format dokumen A4 resmi */
@@ -64,8 +66,8 @@
 
 <div class="container py-4" style="max-width: 750px;">
     <div class="text-center mb-4">
-        <h3 class="fw-bold text-primary">📦 LogistikKu</h3>
-        <p class="text-muted small">Sistem Manajemen Logistik & Distribusi Barang</p>
+        <h3 class="fw-bold text-primary">SIMBA Makasar</h3>
+        <p class="text-muted small">Sistem Informasi Manajemen Barang Puskesmas Makasar</p>
     </div>
 
     <ul class="nav nav-pills mb-4 justify-content-center bg-white p-1 rounded shadow-sm" id="logistikTab" role="tablist">
@@ -206,7 +208,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content shadow">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title id="modalLabel" class="fw-bold fs-6">🏥 Pilih Puskesmas / Unit Layanan Tujuan</h5>
+                <h5 class="modal-title" id="modalLabel" style="font-size: 1rem; font-weight: bold;">🏥 Pilih Puskesmas / Unit Layanan Tujuan</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
@@ -234,7 +236,7 @@
 
 <div id="dokumenBast">
     <div class="bast-kop-container">
-        <img class="bast-logo-dki" src="https://1.bp.blogspot.com/-XVS2yUn6Pqs/XhYfCiU4CEI/AAAAAAAADNs/rx40QuMzmkQTWtcAgZZdSFELBKdBItUvACLcBGAsYHQ/s1600/PROV%2BDKI%2BJAKARTA_PNG.png" alt="Logo DKI Jakarta">
+        <img class="bast-logo-dki" src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Coat_of_arms_of_Jakarta.svg" alt="Logo DKI Jakarta">
         <div class="bast-teks-kop">
             <h5>PEMERINTAH PROVINSI DAERAH KHUSUS IBUKOTA JAKARTA</h5>
             <h4>DINAS KESEHATAN</h4>
@@ -310,28 +312,28 @@
         Demikian berita acara penyerahan alat kesehatan habis pakai dibuat dengan sebenar-benarnya dan ditanda tangani oleh kedua belah pihak.
     </p>
 
-    <div style="text-align: right; font-size: 0.98rem; margin-top: 25px;">
-        Jakarta, <span id="bastTanggalCetak">___________ 2026</span>
-    </div>
-
     <div class="ttd-container">
         <div class="ttd-box">
-            Yang Menerima<br><b>PIHAK KEDUA</b>
-            <div style="height: 65px;"></div>
-            ( ___________________________ )<br>NIP. ...........................................
-        </div>
-        <div class="ttd-box">
+            Jakarta, <span id="bastTanggalCetak">___________ 2026</span><br>
             Yang Menyerahkan<br><b>PIHAK PERTAMA</b>
             <div style="height: 65px;"></div>
             <b><u>apt. Mila Hanifah, S.Farm.</u></b><br>NIK. 102053199510242024051163
         </div>
-        <div class="ttd-box" style="margin-top: 25px;">
-            Mengetahui,<br>Kepala Puskesmas Pembantu
+        
+        <div class="ttd-box">
+            <br>Yang Menerima<br><b>PIHAK KEDUA</b>
             <div style="height: 65px;"></div>
             ( ___________________________ )<br>NIP. ...........................................
         </div>
+
         <div class="ttd-box" style="margin-top: 25px;">
             Mengetahui,<br>Koordinator Farmasi
+            <div style="height: 65px;"></div>
+            ( ___________________________ )<br>NIP. ...........................................
+        </div>
+
+        <div class="ttd-box" style="margin-top: 25px;">
+            Mengetahui,<br>Kepala Puskesmas Pembantu
             <div style="height: 65px;"></div>
             ( ___________________________ )<br>NIP. ...........................................
         </div>
@@ -341,17 +343,13 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // =========================================================================
-    // WAJIB: GANTI URL DI BAWAH INI DENGAN TAUTAN WEB APP /exec APPS SCRIPT ANDA
-    // =========================================================================
     const API_URL = "https://script.google.com/macros/s/AKfycbwfAJC-Os16Q2jqpqP3s6fOjG6ERETC9Wi1olk_syRIkSdiKNxzmsKn19UPM8fDwL4jtg/exec"; 
     
     let masterDataBarang = []; 
-    let instanceModalBootstrap; // Menyimpan objek modal Bootstrap
+    let instanceModalBootstrap; 
 
     document.addEventListener("DOMContentLoaded", () => {
         muatDataStok();
-        // Inisialisasi modal Bootstrap agar bisa dikontrol lewat JavaScript
         instanceModalBootstrap = new bootstrap.Modal(document.getElementById('modalPilihPuskesmas'));
     });
 
@@ -498,7 +496,6 @@
         }
     }
 
-    // ALUR BARU LANGKAH 1: Validasi data barang lalu munculkan Pop-Up Pilihan Puskesmas
     function bukaModalPuskesmas() {
         const id = document.getElementById('txId').value;
         const jumlah = document.getElementById('txJumlah').value;
@@ -511,14 +508,10 @@
             alert('Masukkan jumlah penyerahan barang yang valid!'); 
             return; 
         }
-
-        // Tampilkan modal pilihan unit puskesmas
         instanceModalBootstrap.show();
     }
 
-    // ALUR BARU LANGKAH 2: Ambil unit pilihan modal, suntik data ke BAST, lalu cetak
     function eksekusiCetakSetelahPilih() {
-        // Sembunyikan modal pilihan agar background gelapnya hilang sebelum print
         instanceModalBootstrap.hide();
 
         const id = document.getElementById('txId').value;
@@ -528,8 +521,6 @@
         const jumlah = document.getElementById('txJumlah').value;
         const satuan = document.getElementById('txSatuan').value;
         const spesifikasi = document.getElementById('txSpesifikasi').value || '';
-        
-        // Ambil nilai Puskesmas pilihan dari elemen select di dalam modal
         const unitPilihan = document.getElementById('modalSelectUnit').value;
 
         const daftarHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
@@ -541,22 +532,18 @@
         const namaBulan = daftarBulan[dt.getMonth()];
         const thn = dt.getFullYear();
 
-        // Suntik teks data dinamis ke elemen dokumen cetak BAST
         document.getElementById('bastNarasiPembuka').innerHTML = `Pada Hari <b>${namaHari}</b> Tanggal <b>${tgl}</b> Bulan <b>${namaBulan}</b> Tahun <b>${thn}</b> , kami yang bertanda tangan dibawah ini :`;
         document.getElementById('bastTanggalCetak').innerText = `${tgl} ${namaBulan} ${thn}`;
         
-        // Memasukkan Puskesmas Pilihan ke Jabatan Pihak Kedua
         document.getElementById('bastTeksPuskesmasTujuan').innerText = unitPilihan;
-
         document.getElementById('bastIdBarang').innerText = id;
         document.getElementById('bastNamaBarang').innerHTML = `<b>${nama}</b> ${spesifikasi ? '<br><small style="font-size:0.8rem; color:#444;">Spesifikasi: '+spesifikasi+'</small>' : ''}`;
         document.getElementById('bastMerkBatch').innerText = `${merk} / ${batch}`;
         document.getElementById('bastJumlah').innerText = `${jumlah} ${satuan}`;
 
-        // Triger perintah cetak cetak bawaan browser
         setTimeout(() => {
             window.print();
-        }, 300); // Penundaan singkat memberikan waktu DOM melakukan update rendering teks
+        }, 300); 
     }
 
     async function tambahBarangBaru() {
