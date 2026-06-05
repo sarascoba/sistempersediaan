@@ -1,3 +1,14 @@
+Untuk menyembunyikan atau menghapus tanda tangan "Kepala Puskesmas Pembantu" secara otomatis saat yang dipilih adalah Puskesmas Makasar (Induk), kita bisa mengontrolnya menggunakan JavaScript secara dinamis dengan memanipulasi class Bootstrap (d-none).
+
+Berikut adalah langkah perubahan dan script keseluruhan yang sudah diperbarui:
+
+Bagian yang Diubah:
+Pada HTML Struktur Tanda Tangan: Menambahkan atribut id="ttdKapoestu" pada elemen ttd Kepala Puskesmas Pembantu agar bisa dimanipulasi oleh JavaScript.
+
+Pada Fungsi JavaScript (eksekusiCetakSetelahPilih): Menambahkan logika jika memilih kategori induk, maka elemen ttd tersebut diberikan class d-none (sembunyi saat cetak). Jika memilih pembantu, class d-none dihapus agar ttd muncul kembali.
+
+Script Keseluruhan Utuh:
+HTML
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -38,7 +49,7 @@
         .bast-teks-kop { 
             flex-grow: 1; 
             text-align: center; 
-            margin-right: 80px; /* Menyeimbangkan posisi teks tengah akibat logo kiri */
+            margin-right: 80px; 
         }
         .bast-teks-kop h5 { font-size: 1rem; margin: 0; font-weight: bold; letter-spacing: 0.5px; }
         .bast-teks-kop h4 { font-size: 1.1rem; margin: 2px 0; font-weight: bold; letter-spacing: 0.5px; }
@@ -353,7 +364,7 @@
             ( Hetty Wulandari, Apt )<br>NIP. 198805062011012017
         </div>
 
-        <div class="ttd-box" style="margin-top: 25px;">
+        <div class="ttd-box" id="ttdKapoestu" style="margin-top: 25px;">
             Mengetahui,<br>Kepala Puskesmas Pembantu
             <div style="height: 65px;"></div>
             ( ___________________________ )<br>NIP. ...........................................
@@ -520,7 +531,6 @@
         }
     }
 
-    // Mengatur visibilitas input modal penyerahan BAST secara dinamis
     function toggleKategoriUnit() {
         const jenisKategori = document.querySelector('input[name="radioKategoriUnit"]:checked').value;
         const boxInduk = document.getElementById('boxPuskesmasInduk');
@@ -548,7 +558,6 @@
             return; 
         }
 
-        // Reset kondisi modal ke default
         document.getElementById('radioPuskesmasInduk').checked = true;
         document.getElementById('modalInputPelayanan').value = "";
         toggleKategoriUnit();
@@ -565,9 +574,9 @@
         const satuan = document.getElementById('txSatuan').value;
         const spesifikasi = document.getElementById('txSpesifikasi').value || '';
 
-        // Penentuan teks Unit Tujuan berdasarkan Radio Button terpilih
         const jenisKategori = document.querySelector('input[name="radioKategoriUnit"]:checked').value;
         let unitPilihan = "";
+        const ttdKapoestuEl = document.getElementById('ttdKapoestu');
 
         if (jenisKategori === 'induk') {
             const namaPelayanan = document.getElementById('modalInputPelayanan').value.trim();
@@ -577,8 +586,15 @@
                 return;
             }
             unitPilihan = `Puskesmas Makasar - Pelayanan ${namaPelayanan}`;
+            
+            // JIKA INDUK: Sembunyikan ttd Kepala Puskesmas Pembantu
+            if(ttdKapoestuEl) ttdKapoestuEl.classList.add('d-none');
+
         } else {
             unitPilihan = document.getElementById('modalSelectPustu').value;
+            
+            // JIKA PEMBANTU: Tampilkan kembali ttd Kepala Puskesmas Pembantu
+            if(ttdKapoestuEl) ttdKapoestuEl.classList.remove('d-none');
         }
 
         instanceModalBootstrap.hide();
