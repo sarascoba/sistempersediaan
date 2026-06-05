@@ -208,14 +208,36 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content shadow">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="modalLabel" style="font-size: 1rem; font-weight: bold;">🏥 Pilih Puskesmas / Unit Layanan Tujuan</h5>
+                <h5 class="modal-title" id="modalLabel" style="font-size: 1rem; font-weight: bold;">🏥 Pilih Instansi / Unit Layanan Tujuan</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <div class="mb-3">
-                    <label class="form-label small fw-bold text-secondary">Unit Penerima (PIHAK KEDUA) :</label>
-                    <select id="modalSelectUnit" class="form-select form-select-lg fw-semibold" style="font-size: 1rem;">
-                        <option value="Puskesmas Makasar">Puskesmas Makasar</option>
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-secondary mb-2">Kategori Unit Penerima :</label>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="radioKategoriUnit" id="radioPuskesmasInduk" value="induk" checked onchange="toggleKategoriUnit()">
+                        <label class="form-check-label fw-bold text-dark" for="radioPuskesmasInduk">
+                            Puskesmas Makasar
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="radioKategoriUnit" id="radioPuskesmasPembantu" value="pembantu" onchange="toggleKategoriUnit()">
+                        <label class="form-check-label fw-bold text-dark" for="radioPuskesmasPembantu">
+                            Puskesmas Pembantu
+                        </label>
+                    </div>
+                </div>
+
+                <hr class="text-muted">
+
+                <div id="boxPuskesmasInduk" class="mb-3">
+                    <label class="form-label small fw-bold text-primary">Nama Pelayanan / Pelayanan (Isi Manual) :</label>
+                    <input type="text" id="modalInputPelayanan" class="form-control form-control-lg fw-semibold text-uppercase" style="font-size: 1rem;" placeholder="Contoh: Poli Gigi / Ruang Farmasi">
+                </div>
+
+                <div id="boxPuskesmasPembantu" class="mb-3 d-none">
+                    <label class="form-label small fw-bold text-success">Pilih Puskesmas Pembantu :</label>
+                    <select id="modalSelectPustu" class="form-select form-select-lg fw-semibold" style="font-size: 1rem;">
                         <option value="Puskesmas Pembantu Makasar">Puskesmas Pembantu Makasar</option>
                         <option value="Puskesmas Pembantu Pinang Ranti">Puskesmas Pembantu Pinang Ranti</option>
                         <option value="Puskesmas Pembantu Halim Perdana Kusuma I">Puskesmas Pembantu Halim Perdana Kusuma I</option>
@@ -232,7 +254,6 @@
         </div>
     </div>
 </div>
-
 
 <div id="dokumenBast">
     <div class="bast-kop-container">
@@ -329,7 +350,7 @@
         <div class="ttd-box" style="margin-top: 25px;">
             Mengetahui,<br>Koordinator Farmasi
             <div style="height: 65px;"></div>
-            ( ___________________________ )<br>NIP. ...........................................
+            ( Hetty Wulandari, Apt )<br>NIP. 198805062011012017
         </div>
 
         <div class="ttd-box" style="margin-top: 25px;">
@@ -373,7 +394,10 @@
 
     async function muatDataStok() {
         const loadingEl = document.getElementById('loading');
-        if (loadingEl) loadingEl.style.display = 'block';
+        if (loadingEl) {
+            loadingEl.style.display = 'block';
+            loadingEl.innerText = 'Memuat database...';
+        }
         try {
             let response = await fetch(API_URL);
             masterDataBarang = await response.json();
@@ -496,6 +520,21 @@
         }
     }
 
+    // Mengatur visibilitas input modal penyerahan BAST secara dinamis
+    function toggleKategoriUnit() {
+        const jenisKategori = document.querySelector('input[name="radioKategoriUnit"]:checked').value;
+        const boxInduk = document.getElementById('boxPuskesmasInduk');
+        const boxPembantu = document.getElementById('boxPuskesmasPembantu');
+
+        if (jenisKategori === 'induk') {
+            boxInduk.classList.remove('d-none');
+            boxPembantu.classList.add('d-none');
+        } else {
+            boxInduk.classList.add('d-none');
+            boxPembantu.classList.remove('d-none');
+        }
+    }
+
     function bukaModalPuskesmas() {
         const id = document.getElementById('txId').value;
         const jumlah = document.getElementById('txJumlah').value;
@@ -508,12 +547,16 @@
             alert('Masukkan jumlah penyerahan barang yang valid!'); 
             return; 
         }
+
+        // Reset kondisi modal ke default
+        document.getElementById('radioPuskesmasInduk').checked = true;
+        document.getElementById('modalInputPelayanan').value = "";
+        toggleKategoriUnit();
+
         instanceModalBootstrap.show();
     }
 
     function eksekusiCetakSetelahPilih() {
-        instanceModalBootstrap.hide();
-
         const id = document.getElementById('txId').value;
         const nama = document.getElementById('txNamaBarang').value;
         const merk = document.getElementById('txMerk').value;
@@ -521,7 +564,24 @@
         const jumlah = document.getElementById('txJumlah').value;
         const satuan = document.getElementById('txSatuan').value;
         const spesifikasi = document.getElementById('txSpesifikasi').value || '';
-        const unitPilihan = document.getElementById('modalSelectUnit').value;
+
+        // Penentuan teks Unit Tujuan berdasarkan Radio Button terpilih
+        const jenisKategori = document.querySelector('input[name="radioKategoriUnit"]:checked').value;
+        let unitPilihan = "";
+
+        if (jenisKategori === 'induk') {
+            const namaPelayanan = document.getElementById('modalInputPelayanan').value.trim();
+            if (!namaPelayanan) {
+                alert('Silakan isi nama Pelayanan / Poli tujuan terlebih dahulu!');
+                document.getElementById('modalInputPelayanan').focus();
+                return;
+            }
+            unitPilihan = `Puskesmas Makasar - Pelayanan ${namaPelayanan}`;
+        } else {
+            unitPilihan = document.getElementById('modalSelectPustu').value;
+        }
+
+        instanceModalBootstrap.hide();
 
         const daftarHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
         const daftarBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -550,49 +610,57 @@
         const id = document.getElementById('newId').value.trim();
         const nama = document.getElementById('newNama').value.trim();
         const merk = document.getElementById('newMerk').value.trim();
-        const spesifikasi = document.getElementById('newSpesifikasi').value.trim();
         const satuan = document.getElementById('newSatuan').value.trim();
+        const spesifikasi = document.getElementById('newSpesifikasi').value.trim();
         const noBatch = document.getElementById('newNoBatch').value.trim();
         const expired = document.getElementById('newExpired').value;
         const izinEdar = document.getElementById('newIzinEdar').value.trim();
         const sumberDana = document.getElementById('newSumberDana').value.trim();
         const stok = document.getElementById('newStok').value;
 
-        if (!nama || !merk || !satuan || !expired) { 
-            alert('Kolom Nama, Merk, Satuan, dan Expired Wajib Diisi!'); 
-            return; 
+        if (!nama || !merk || !satuan || !expired) {
+            alert('Harap lengkapi semua field yang diberi tanda bintang (*) !');
+            return;
         }
 
-        try {
-            let btn = document.querySelector("button[onclick='tambahBarangBaru()']");
-            if(btn) { btn.disabled = true; btn.innerText = "⏳ Menyimpan..."; }
+        if (confirm(`Apakah Anda yakin ingin mendaftarkan item "${nama}" ke dalam database?`)) {
+            const loadingEl = document.getElementById('loading');
+            try {
+                if (loadingEl) {
+                    loadingEl.style.display = 'block';
+                    loadingEl.innerText = 'Menyimpan item baru ke database...';
+                }
 
-            let response = await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ 
-                    id: id, nama: nama, merk: merk, spesifikasi: spesifikasi,
-                    satuan: satuan, noBatch: noBatch, expired: expired,
-                    izinEdar: izinEdar, sumberDana: sumberDana, stok: stok, jenis: 'baru' 
-                })
-            });
-            let hasil = await response.json();
-            alert(hasil.status);
-            
-            if(btn) { btn.disabled = false; btn.innerText = "💾 Simpan Item ke Database"; }
+                let response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        id: id,
+                        nama: nama,
+                        merk: merk,
+                        satuan: satuan,
+                        spesifikasi: spesifikasi,
+                        noBatch: noBatch,
+                        expired: expired,
+                        izinEdar: izinEdar,
+                        sumberDana: sumberDana,
+                        stok: parseInt(stok) || 0,
+                        jenis: 'register_baru'
+                    })
+                });
 
-            if(hasil.status && !hasil.status.includes("Error")) {
+                let hasil = await response.json();
+                alert(hasil.status);
+
                 document.getElementById('formBarangBaru').reset();
-                await muatDataStok(); 
-                let firstTab = new bootstrap.Tab(document.getElementById('update-tab'));
-                firstTab.show();
+                await muatDataStok();
+                
+            } catch (error) {
+                alert('Gagal mendaftarkan item baru ke database Spreadsheet.');
+                if (loadingEl) loadingEl.style.display = 'none';
             }
-        } catch (error) { 
-            alert('Gagal menyimpan ke database. Silakan periksa koneksi Apps Script Anda.'); 
-            let btn = document.querySelector("button[onclick='tambahBarangBaru()']");
-            if(btn) { btn.disabled = false; btn.innerText = "💾 Simpan Item ke Database"; }
-            generasiIdBarangOtomatis(); 
         }
     }
 </script>
+
 </body>
 </html>
