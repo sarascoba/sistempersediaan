@@ -1,13 +1,3 @@
-Untuk menyembunyikan atau menghapus tanda tangan "Kepala Puskesmas Pembantu" secara otomatis saat yang dipilih adalah Puskesmas Makasar (Induk), kita bisa mengontrolnya menggunakan JavaScript secara dinamis dengan memanipulasi class Bootstrap (d-none).
-
-Berikut adalah langkah perubahan dan script keseluruhan yang sudah diperbarui:
-
-Bagian yang Diubah:
-Pada HTML Struktur Tanda Tangan: Menambahkan atribut id="ttdKapoestu" pada elemen ttd Kepala Puskesmas Pembantu agar bisa dimanipulasi oleh JavaScript.
-
-Pada Fungsi JavaScript (eksekusiCetakSetelahPilih): Menambahkan logika jika memilih kategori induk, maka elemen ttd tersebut diberikan class d-none (sembunyi saat cetak). Jika memilih pembantu, class d-none dihapus agar ttd muncul kembali.
-
-Script Keseluruhan Utuh:
 HTML
 <!DOCTYPE html>
 <html lang="id">
